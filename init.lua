@@ -287,6 +287,12 @@ require('lazy').setup({
     end,
   },
 
+  {
+    '3rd/image.nvim',
+    build = false,
+    opts = { processor = 'magick_cli' },
+  },
+
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
     opts = {
