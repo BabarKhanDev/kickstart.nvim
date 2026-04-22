@@ -84,6 +84,9 @@ I hope you enjoy your Neovim journey,
 P.S. You can delete this when you're done too. It's your config now! :)
 --]]
 
+-- Point neovim at a python virtual env
+vim.g.python3_host_prog = vim.fn.expand '~/.virtualenvs/neovim/bin/python3'
+
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -175,7 +178,8 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
-
+vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open [E]rror' })
+vim.keymap.set('n', '<leader>mo', '<cmd>noautocmd MoltenEnterOutput<CR>', { desc = 'Open [M]olten [O]utput' })
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
@@ -289,8 +293,39 @@ require('lazy').setup({
 
   {
     '3rd/image.nvim',
+    version = '1.1.0',
     build = false,
-    opts = { processor = 'magick_cli' },
+    opts = {
+      processor = 'magick_cli',
+      backend = 'kitty',
+      max_width = 100,
+      max_height = 20,
+      max_height_window_percentage = math.huge,
+      max_width_window_percentage = math.huge,
+      window_overlap_clear_enabled = true,
+      window_overlap_clear_ft_ignore = { 'cmp_menu', 'cmp_docs', '' },
+    },
+  },
+
+  {
+    'vhyrro/luarocks.nvim',
+    priority = 1000, -- Very high priority is required, luarocks.nvim should run as the first plugin in your config.
+    opts = {
+      rocks = { 'dkjson' },
+    },
+    config = true,
+  },
+
+  {
+    'benlubas/molten-nvim',
+    version = '^1.0.0', -- use version <2.0.0 to avoid breaking changes
+    dependencies = { '3rd/image.nvim' },
+    build = ':UpdateRemotePlugins',
+    init = function()
+      -- these are examples, not defaults. Please see the readme
+      vim.g.molten_image_provider = 'image.nvim'
+      vim.g.molten_output_win_max_height = 20
+    end,
   },
 
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
@@ -304,6 +339,31 @@ require('lazy').setup({
         changedelete = { text = '~' },
       },
     },
+  },
+
+  {
+    'GCBallesteros/NotebookNavigator.nvim',
+    keys = {
+      {
+        ']h',
+        function()
+          require('notebook-navigator').move_cell 'd'
+        end,
+      },
+      {
+        '[h',
+        function()
+          require('notebook-navigator').move_cell 'u'
+        end,
+      },
+      { '<leader>X', "<cmd>lua require('notebook-navigator').run_cell()<cr>" },
+      { '<leader>x', "<cmd>lua require('notebook-navigator').run_and_move()<cr>" },
+    },
+    dependencies = {
+      'echasnovski/mini.comment',
+      'benlubas/molten-nvim',
+    },
+    event = 'VeryLazy',
   },
 
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
