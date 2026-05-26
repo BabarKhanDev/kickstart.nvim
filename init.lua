@@ -340,7 +340,18 @@ require('lazy').setup({
       },
     },
   },
-
+  {
+    'romus204/referencer.nvim',
+    config = function()
+      require('referencer').setup {
+        enable = true,
+        format = ' %d ref',
+        color = '#FFA500',
+        pattern = { '*.py' },
+        lsp_servers = { 'pyright' },
+      }
+    end,
+  },
   {
     'GCBallesteros/NotebookNavigator.nvim',
     keys = {
@@ -365,7 +376,15 @@ require('lazy').setup({
     },
     event = 'VeryLazy',
   },
-
+  {
+    'lervag/vimtex',
+    lazy = false, -- we don't want to lazy load VimTeX
+    -- tag = "v2.15", -- uncomment to pin to a specific release
+    init = function()
+      -- VimTeX configuration goes here, e.g.
+      vim.g.vimtex_view_method = 'zathura'
+    end,
+  },
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
   --
   -- This is often very useful to both group configuration, as well as handle
@@ -1037,31 +1056,50 @@ require('lazy').setup({
   },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
-    branch = 'master',
+    branch = 'main',
     build = ':TSUpdate',
-    main = 'nvim-treesitter.configs', -- Sets main module to use for opts
-    -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
-    opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
-      -- Autoinstall languages that are not installed
-      auto_install = true,
-      highlight = {
-        enable = true,
-        -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
-        --  If you are experiencing weird indenting issues, add the language to
-        --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { 'ruby' },
-      },
-      indent = { enable = true, disable = { 'ruby' } },
-    },
-    -- There are additional nvim-treesitter modules that you can use to interact
-    -- with nvim-treesitter. You should go explore a few and see what interests you:
-    --
-    --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
-    --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
-    --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
-  },
+    lazy = false,
+    version = false,
+    config = function()
+      local ts = require 'nvim-treesitter'
 
+      local ensure_installed = {
+        'bash',
+        'c',
+        'diff',
+        'html',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'query',
+        'vim',
+        'vimdoc',
+      }
+
+      ts.install(ensure_installed)
+
+      vim.api.nvim_create_autocmd('FileType', {
+        callback = function(args)
+          local ft = vim.bo[args.buf].filetype
+          local lang = vim.treesitter.language.get_lang(ft) or ft
+
+          if not pcall(vim.treesitter.language.add, lang) then
+            local ok, task = pcall(ts.install, { lang })
+            if not ok then
+              return
+            end
+            task:wait(5000)
+            if not pcall(vim.treesitter.language.add, lang) then
+              return
+            end
+          end
+
+          pcall(vim.treesitter.start, args.buf, lang)
+        end,
+      })
+    end,
+  },
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.
