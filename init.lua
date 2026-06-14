@@ -90,6 +90,10 @@ vim.o.confirm = true
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
+-- end of word motion
+vim.keymap.set('i', '<C-Right>', '<Esc>ea', {})
+vim.keymap.set('n', '<C-Right>', 'ea', {})
+
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open [E]rror' })
