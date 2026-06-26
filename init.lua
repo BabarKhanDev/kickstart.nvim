@@ -260,7 +260,14 @@ require('lazy').setup({
     },
     event = 'VeryLazy',
   },
-
+  {
+    'folke/zen-mode.nvim',
+    opts = {
+      -- your configuration comes here
+      -- or leave it empty to use the default settings
+      -- refer to the configuration section below
+    },
+  },
   {
     'lervag/vimtex',
     lazy = false, -- we don't want to lazy load VimTeX
@@ -268,6 +275,7 @@ require('lazy').setup({
     init = function()
       -- VimTeX configuration goes here, e.g.
       vim.g.vimtex_view_method = 'zathura'
+      vim.g.vimtex_fold_enabled = 1
     end,
   },
 
