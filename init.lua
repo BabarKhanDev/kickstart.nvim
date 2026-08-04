@@ -288,6 +288,7 @@ require('lazy').setup({
       -- VimTeX configuration goes here, e.g.
       vim.g.vimtex_view_method = 'zathura'
       vim.g.vimtex_fold_enabled = 1
+      vim.g.vimtex_compiler_latexmk_engines = { _ = '-lualatex' }
     end,
   },
 
@@ -883,6 +884,8 @@ require('lazy').setup({
         'latex',
         'html',
         'yaml',
+        'json',
+        'jsonc',
       }
 
       ts.install(ensure_installed)
